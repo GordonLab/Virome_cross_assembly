@@ -1,25 +1,30 @@
 #!/usr/bin/perl -w
 
 # Written by Alejandro Reyes
-# Receives the output of several runs of cd-hit-est and generates a file for each cluster and some statistics on STDOUT of the clustering.
+# Receives the output of cd-hit-est (cluster file) and generates a file where for each cluster it prints the 5 longest read names (if available)
 #
-# Usage: Parse_CD-Hit-Top5.pl <highest.clstr> ...<lowest.clstr> > <output>
+# Usage: Parse_CD-Hit-Top5_singleFile.pl <cd-hit.clstr> > <output>
 #
+# Input: The clstr output file from cd-hit-est
+# Output: The top 5 names of the longest reads from each cluster
+# Note:
+# Created: April 05 2014
+# Last-updated: Sept 06 2015
+
 
 use strict;
 
 if (@ARGV != 1) {
-  die "\nUsage:  Parse_CD-Hit-Top5.pl <File.clstr> > <output>\n\n";
+  die "\nUsage:  Parse_CD-Hit-Top5_singleFile.pl <File.clstr> > <output>\n\n";
 }
 
 my $file = shift @ARGV;
 
-#Reads the lowest file
+#Reads the cluster file
 
 open (IN, "<$file") or die ("Couldn't open file: $file\n");
 
 my %rep = ();
-my %parent = ();
 my $name ="";
 my $head="";
 my @temp=();
@@ -36,9 +41,6 @@ while (my $lines=<IN>) {
   }elsif ($lines =~ /^>/){
     next unless ($name && $head);
     @{$rep{$head}}= (@temp);
-    for (my $i=0; $i<@temp; $i++){
-      $parent{$temp[$i][-1]}=$head;
-    }
     @temp=();
     $name="";
     $head="";
@@ -46,14 +48,10 @@ while (my $lines=<IN>) {
 }
 close IN;
 @{$rep{$head}}= (@temp);
-for (my $i=0; $i<@temp; $i++){
-  $parent{$temp[$i][-1]}=$head;
-}
 @temp=();
 $name="";
 $head="";
 
-%parent=();
 #Prints the sequences to the output and the statistics;
 
 foreach my $k (keys %rep){

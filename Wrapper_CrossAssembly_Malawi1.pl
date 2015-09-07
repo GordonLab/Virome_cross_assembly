@@ -1,7 +1,17 @@
 #!/usr/bin/perl -w
 
 # Written by Alejandro Reyes
-## For a given prefix will run the whole assembly pipeline
+# For a given prefix will run the whole assembly pipeline
+# Is going to be called on a family of files. All named starting by prefix i.e (Ma_F112)T1.1.1.1.fasta\n\n";
+#
+# Usage: Wrapper_CrossAssembly_Malawi1.pl <Prefix> > LogFile
+#
+# Input: A prefix that should be the header of one or more fasta files to run the cross-assembly pipeline 
+# Output: Creates a folder with the prefix, a file with the concatenated fasta files and a file with the initial commands which is finally submitted to a SGE cluster
+# Note:
+# Created: May 24 2014.
+# Last-updated: Sept 06 2015
+
 
 use strict;
 

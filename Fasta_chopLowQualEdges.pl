@@ -1,7 +1,15 @@
 #!/usr/bin/perl -w
 
 # Written by Alejandro Reyes
-
+# Receives a multifasta file and removes the low qualities ends represented by lowercase letters, prints sequences only if longer than 500nt
+#
+# Usage: Fasta_chopLowQualEdges.pl <Fasta_file> > <output>
+#
+# Input: A multifasta file
+# Output: The same multifasta file where the low quality characters represented by lowercase letters has been removed from the ends. It removes sequences shorted than 500nt
+# Note:
+# Created: March 16 2013
+# Last-updated: Sept 06 2015
 
 use strict;
 

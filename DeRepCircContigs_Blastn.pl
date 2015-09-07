@@ -1,22 +1,30 @@
 #!/usr/bin/perl -w
+
+# Written by Alejandro Reyes
+#
+#
+# Usage: DeRepCircContigs_Blastn.pl <Output_Blastn> <LenFile> <Contigs> > <output> 
+#
+# Input: the output of a blastn of all-vs-all contigs, a tab delimited file with the length of each contig and the multifasta file of the contigs
+# Output: prints a multifasta file that has been de-replicated at 90% and if a contig as terminal overlap is rename with the suffix "_circ"
+# Note:
+# Created: March 14 2013
+# Last-updated: Sept 06 2015
+
 use strict;
 
-
-
-die ("Usage: DeRepContigs_Blastn.pl <Output_Blastt> <LenFile> <Contigs> > <output>\n") unless (scalar(@ARGV) == 3);
-
-
+die ("Usage: DeRepCircContigs_Blastn.pl <Output_Blastn> <LenFile> <Contigs> > <output>\n") unless (scalar(@ARGV) == 3);
 
 my $blast = shift @ARGV;
+open (IN, "<$blast") or die ("Couldn't open file: $blast\n");
 my $len = shift @ARGV;
-my $fna = shift @ARGV;
-
-
 open (LEN, "<$len") or die ("Couldn't open file: $len\n");
+my $fna = shift @ARGV;
+open (FNA, "<$fna") or die ("Couldn't open file: $fna\n");
 
+# Store lengths of contigs in hash
 my %length=();
 my $name="";
-
 while (my $j = <LEN>){
   chomp($j);
   my @arr=split /\s+/, $j;
@@ -31,7 +39,7 @@ my %eval=();
 my $last="";
 my @seqBlast=();
 
-open (IN, "<$blast") or die ("Couldn't open file: $blast\n");
+# Process the hits of the blast sending to the function all hits against each entry
 while (my $l=<IN>){
   chomp ($l);
   my @arr=split /\s+/, $l;
@@ -50,7 +58,9 @@ if ($last ne ""){
   &analyze_hit(\@seqBlast, \%kept, \%removed, \%circular, \%eval) unless $removed{$seqBlast[0][0]};
 }
 
-open (FNA, "<$fna") or die ("Couldn't open file: $fna\n");
+
+
+# Read the contig file, if it was contained in another contig is removed if is flagged as circular, the name is modified.
 my $rename="";
 my $seq="";
 my $na="";
@@ -78,6 +88,7 @@ unless ($na eq "" || $removed{$na}){
 
 #Subroutines
 
+# If is contained in more than 90% of the length by other contigs, then is flagged to be removed
 sub analyze_hit{
   my @seq = @{$_[0]};
   my $keep = $_[1];
@@ -89,8 +100,8 @@ sub analyze_hit{
     return if (${$removed}{$seq[$i][0]});
     ${$keep}{$seq[$i][0]}=1;
     my @coords = sort {$a <=> $b} ($seq[$i][8], $seq[$i][9]);
-    if ($seq[$i][0] eq $seq[$i][1]){
-      if ($coords[0] == $seq[$i][8]){
+    if ($seq[$i][0] eq $seq[$i][1]){ # if is a hit within the same contig
+      if ($coords[0] == $seq[$i][8]){ # if the hit is in the same orientation of the contig
 	${$circular}{$seq[$i][0]}=1 if (($seq[$i][3] > $seq[$i][6]) && ($seq[$i][3] > ($length{$seq[$i][1]}-$seq[$i][9])));
 	${$circular}{$seq[$i][0]}=2 if (($seq[$i][3] > $seq[$i][8]) && ($seq[$i][3] > ($length{$seq[$i][0]}-$seq[$i][7])));
       }

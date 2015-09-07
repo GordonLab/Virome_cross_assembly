@@ -2,15 +2,14 @@
 
 # Written by Alejandro Reyes
 # Receives a Fasta File and a list of names and retrieve the sequences that begin with the name
-# or the sequences that dont begin with that name.
 #
-# Usage: GetSequences.pl "Names list" "Fasta File" > "output"
+# Usage: GetSequences.pl "Names_list" "Fasta_File" > "output"
 #
-# Input:
-# Output: 
+# Input: Two files, one with a list of names (without spaces) and the second a Fasta formated file
+# Output: A fasta file of sequences where the names were within the list
 # Note:
 # Created: Aug 11 / 08.
-# Last-updated:
+# Last-updated: Sept 06 2015
 
 use strict;
 
@@ -29,8 +28,7 @@ my %names = ();
 while (my $lines=<IN>) {
 	if ($lines =~ /\S+/){
 	chomp $lines;
-        #my @entry = split (/\-/, $lines);
-	my @entry = split (/\s+/, $lines);
+	my @entry = split (/\s+/, $lines); # The list will be given by the first word in the line until the first space
 	$entry[0]=~s/^>//;
 	$names{$entry[0]}=1;
 	}	
@@ -43,23 +41,18 @@ close IN;
 $file = shift @ARGV;
 open (IN, "<$file") or die ("Couldn't open file: $file\n");
 
-my $counter = 0;
+my $check = 0;
 while (my $line = <IN>) {
 	if ($line =~ /^>/){
-		$counter = 0;
+		$check = 0;
 		chomp $line;
-		$line =~ s/>//;			#Only if the name does not contain >, otherwise comment this line
+		$line =~ s/>//;
 		my @temp = split (/\s+/, $line);
-#		my @temp = split (/\-/, $line);
-
 		if (exists $names{$temp[0]}){
-		#if (!(exists $names{$temp[0]})){ 	#Modification for don't exist, if the name is not in the list, print the sequence
 			print ">$line\n";
-			$counter = 1;
+			$check = 1;
 		}
-	}
-	
-	elsif (($line !~ /^\@/) && ($counter == 1)){
+	}elsif ($check == 1){
 		print $line;
 	}
 	

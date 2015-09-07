@@ -1,9 +1,21 @@
 #!/usr/bin/perl -w
+
+# Written by Alejandro Reyes
+#
+#
+# Usage: FR-Hit_processReads_map.pl <Output_FR-Hit> <Contigs> <ReadsFile> <Header> 
+#
+# Input: the output of FR-Hit, the multifasta file used as FR-Hit database, the reads used for mapping and a header for the outfiles
+# Output: After parsing the hits it prints in separate files the names of the reads that are potential chimeras, that hit the edge of the contigs of that do not hit any contig
+# Note:
+# Created: March 14 2013
+# Last-updated: Sept 06 2015
+
 use strict;
 
 
 
-die ("Usage: FR-Hit_processReads_map.pl <Output_FR-Hit> <Contigs> <ReadsFile> <Header> > <output>\n") unless (scalar(@ARGV) == 4);
+die ("Usage: FR-Hit_processReads_map.pl <Output_FR-Hit> <Contigs> <ReadsFile> <Header>\n") unless (scalar(@ARGV) == 4);
 
 
 
@@ -21,11 +33,10 @@ my %length=();
 my $name="";
 my $seq="";
 
+# stores a hash with the sequence lengths
 while (my $j = <FNA>){
   chomp($j);
-  if ($j =~ /^>/){
-    my @arr=split /\s+/, $j;
-    $arr[0]=~s/>(\S+)//;
+  if ($j =~ /^>(\S+)/){
     $name=$1;
     $seq="";
   }else{
@@ -37,6 +48,7 @@ close FNA;
 
 print "Done with the FNA\n";
 
+# process the mapping file
 my %used=();
 my %chimeric=();
 my %edge=();
@@ -52,8 +64,7 @@ while (my $l = <IN>){
   my $perUsed = $array[3]/$array[1];
   if ($perUsed > 0.75){
     $used{$array[0]}=1;
-   # print "Is using GRB43BJ02HTL86\n" if ($array[0] eq "GRB43BJ02HTL86");
-  }else{
+   }else{
     next if ($used{$array[0]});
     next if ($chimeric{$array[0]});
     my $missed = $array[1]-$array[3];
@@ -65,7 +76,6 @@ while (my $l = <IN>){
       my @coords=sort {$a<=>$b} ($array[4], $array[5]);
       if ($potChimeric{$array[0]}){
 	foreach my $k (keys (%{$potChimeric{$array[0]}})){
-	  #next if ($k eq $array[8]);
 	  my $st=$coords[0]<$potChimeric{$array[0]}{$k}[0] ? $coords[0] : $potChimeric{$array[0]}{$k}[0];
 	  my $sp=$coords[1]>$potChimeric{$array[0]}{$k}[1] ? $coords[1] : $potChimeric{$array[0]}{$k}[1];
 	  my $len = $sp - $st;
@@ -96,7 +106,6 @@ while (my $t =<READS>){
       print OUTC $name."\n" if ($chimeric{$name});
       print OUTE ">$name\n$read_seq\n" if ($edge{$name});
       print OUTL ">$name\n$read_seq\n"  unless ($used{$name} or $potChimeric{$name});
-      #print "$name is partially chimeric\n" if ($potChimeric{$name} && (not defined ($chimeric{$name})));
     }
     $name = $t;
     $read_seq="";
@@ -107,14 +116,7 @@ while (my $t =<READS>){
 print OUTC $name."\n" if ($chimeric{$name});
 print OUTE ">$name\n$seq\n" if ($edge{$name});
 print OUTL ">$name\n$seq\n"  unless ($used{$name});
-#print "$name is partially chimeric\n" if ($potChimeric{$name} && (not defined ($chimeric{$name})));
 close READS;
 close OUTC;
 close OUTE;
 close OUTL;
-
-      
-
-
-
-

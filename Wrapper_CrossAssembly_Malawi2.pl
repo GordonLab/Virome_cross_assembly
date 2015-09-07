@@ -1,7 +1,16 @@
 #!/usr/bin/perl -w
 
 # Written by Alejandro Reyes
-## For a given prefix will run the whole assembly pipeline
+# For a given prefix will run the whole assembly pipeline
+# Is going to be called on a family of files. All named starting by prefix i.e (Ma_F112)T1.1.1.1.fna\n\n";
+#
+# Usage: Wrapper_CrossAssembly_Malawi.pl <Prefix> > LogFile
+#
+# Input: A prefix that should be the name of the folder where the wrapper 1 was ran.
+# Output: Runs the whole pipeline generating several files.
+# Note:
+# Created: June 16 2014.
+# Last-updated: Sept 06 2015
 
 use strict;
 
